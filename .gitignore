@@ -20,4 +20,5 @@ Thumbs.db
 # Generated QA output
 .playwright/
 node_modules/
-
+hs_err_pid*.log
+replay_pid*.log

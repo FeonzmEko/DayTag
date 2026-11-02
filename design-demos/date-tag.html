@@ -176,6 +176,7 @@
       clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px, 14px 0);
       cursor: pointer; transition: transform .18s ease;
     }
+    .desktop-widget.square { min-height: 186px; }
     .desktop-widget.large { min-height: 242px; }
     .desktop-widget:hover { transform: translateY(-2px); }
     .desktop-widget:before { content:""; position: absolute; left: 19px; top: 21px; width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--line); background: var(--cream); }
@@ -315,16 +316,20 @@
     }
 
     function TagWidget() {
-      const [large, setLarge] = useState(false);
+      const [size, setSize] = useState('compact');
       return (
         <div className="desktop" data-screen="widget">
           <div className="desktop-head"><strong>11:02</strong><span>桌面预览</span></div>
-          <div className={`desktop-widget ${large ? 'large' : ''}`} data-testid="widget-card">
+          <div className={`desktop-widget ${size}`} data-testid="widget-card">
             <div className="widget-head"><span>DAYTAG</span><small>12.12</small></div>
             <div className="widget-body"><strong>40</strong><div><h3>旅行</h3><p>还有 · 天</p></div></div>
-            {large && <div className="widget-extra">去看海。把工作留在离海很远的地方。</div>}
+            {size !== 'compact' && <div className="widget-extra">去看海。把工作留在离海很远的地方。</div>}
           </div>
-          <div className="size-row"><button className={!large ? 'selected' : ''} onClick={() => setLarge(false)}>2 × 1</button><button className={large ? 'selected' : ''} onClick={() => setLarge(true)}>4 × 2</button></div>
+          <div className="size-row">
+            <button className={size === 'compact' ? 'selected' : ''} onClick={() => setSize('compact')}>2 × 1</button>
+            <button className={size === 'square' ? 'selected' : ''} onClick={() => setSize('square')}>2 × 2</button>
+            <button className={size === 'large' ? 'selected' : ''} onClick={() => setSize('large')}>4 × 2</button>
+          </div>
           <p className="hint">一枚吊牌，只记住一个日子。长按桌面添加更多 DayTag 小部件。</p>
         </div>
       );

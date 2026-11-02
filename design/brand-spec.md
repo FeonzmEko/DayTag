@@ -16,9 +16,10 @@ DayTag 是本次从零建立的新产品，没有既存官网、Logo、VI、字�
 
 ### Logo
 
-- 状态：待最终方向确定后创建原创自适应图标。
-- 原则：抽象日期标记或标签形态，不使用通用渐变色球、字母渐变或生成式 AI 图标。
-- 文件目标：Android adaptive icon foreground / background / monochrome。
+- 状态：已按「日期吊牌」方向实现原创 Android 自适应图标。
+- 形态：奶油色切角吊牌、朱砂色打孔与两道标签线。
+- 文件：`app/src/main/res/drawable/ic_launcher_foreground.xml` 与 `app/src/main/res/mipmap-anydpi-v26/`。
+- 原则：不使用通用渐变色球、字母渐变或生成式 AI 图标。
 
 ### 产品图与摄影
 
@@ -52,4 +53,3 @@ DayTag 是本次从零建立的新产品，没有既存官网、Logo、VI、字�
 - 触控目标至少 48dp。
 - 大数字与单位必须保持语义关联，并提供完整读屏描述。
 - 颜色不是区分事件状态的唯一手段，文案始终明确显示“还有 / 今天 / 已经”。
-
