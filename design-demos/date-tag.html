@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DayTag · 日期吊牌</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #f0e4cc;
+      --cream-light: #f8efdf;
+      --cocoa: #2d211a;
+      --muted: #796655;
+      --cinnabar: #a6442b;
+      --line: rgba(45,33,26,.24);
+    }
+    html, body { min-width: 1600px; min-height: 100%; }
+    body {
+      background: #dfd1b9;
+      color: var(--cocoa);
+      font-family: "Noto Sans SC", "WenQuanYi Zen Hei", sans-serif;
+    }
+    button, input, textarea { font: inherit; color: inherit; }
+    button { border: 0; }
+    .showcase { width: 1600px; margin: 0 auto; padding: 48px 72px 74px; }
+    .showcase-head {
+      display: grid; grid-template-columns: 1fr 520px; gap: 64px; align-items: end;
+      padding-bottom: 34px; border-bottom: 1px solid rgba(45,33,26,.3);
+    }
+    .eyebrow { color: var(--cinnabar); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; font-weight: 800; margin-bottom: 15px; }
+    h1 {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+      font-size: 62px; line-height: 1.06; letter-spacing: -.045em; font-weight: 600;
+    }
+    h1 i { font-style: normal; color: var(--cinnabar); }
+    .showcase-copy { color: #665448; font-size: 16px; line-height: 1.85; max-width: 510px; }
+    .showcase-copy strong { color: var(--cocoa); font-weight: 600; }
+    .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 44px 38px; padding-top: 40px; }
+    .phone-card { width: 432px; }
+    .phone-label { display: flex; justify-content: space-between; align-items: baseline; margin: 0 12px 11px; color: #716152; font-size: 12px; letter-spacing: .07em; }
+    .phone-label b { color: var(--cocoa); font-size: 13px; letter-spacing: 0; font-weight: 600; }
+    .android-wrap {
+      display: inline-block; padding: 10px; background: #191919; border-radius: 44px;
+      box-shadow: 0 0 0 2px #292929, 0 22px 46px rgba(65,45,28,.24); position: relative;
+    }
+    .android-screen { position: relative; border-radius: 36px; overflow: hidden; background: var(--cream); }
+    .status-bar {
+      position: absolute; top: 0; left: 0; right: 0; height: 32px; display: flex;
+      align-items: center; justify-content: space-between; padding: 0 24px;
+      font-family: sans-serif; font-size: 12px; font-weight: 600; z-index: 20; pointer-events: none;
+    }
+    .punch-hole { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; border-radius: 50%; background: #000; z-index: 30; }
+    .status-icons { display: flex; align-items: center; gap: 5px; }
+    .battery { width: 20px; height: 9px; border: 1.4px solid currentColor; border-radius: 2px; padding: 1px; }
+    .battery > div { height: 100%; background: currentColor; border-radius: 1px; }
+    .android-content { position: absolute; top: 32px; left: 0; right: 0; bottom: 24px; overflow: auto; background: var(--cream); }
+    .android-nav { position: absolute; bottom: 0; left: 0; right: 0; height: 24px; display: flex; align-items: center; justify-content: center; z-index: 10; }
+    .android-nav span { width: 94px; height: 4px; background: rgba(45,33,26,.4); border-radius: 9px; }
+    .screen { min-height: 744px; padding: 23px 22px 29px; position: relative; }
+    .topline { min-height: 48px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .brand { display: flex; align-items: center; gap: 8px; font-family: Georgia, serif; font-size: 15px; font-weight: 700; letter-spacing: .07em; }
+    .brand:before {
+      content:""; width: 13px; height: 13px; border: 2px solid var(--cinnabar);
+      border-radius: 50%; box-shadow: inset 0 0 0 2px var(--cream);
+    }
+    .add-button {
+      width: 48px; height: 48px; border-radius: 50%; background: var(--cocoa); color: var(--cream-light);
+      display: grid; place-items: center; cursor: pointer; transition: transform .17s ease;
+    }
+    .add-button:hover { transform: rotate(90deg); }
+    .tag-title {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 38px; line-height: 1.18;
+      letter-spacing: -.035em; font-weight: 600; margin: 10px 0 9px;
+    }
+    .tag-title em { color: var(--cinnabar); font-style: normal; }
+    .intro-copy { color: var(--muted); font-size: 12px; line-height: 1.7; margin-bottom: 20px; }
+    .tag-stack { position: relative; padding-left: 10px; }
+    .tag-stack:before {
+      content:""; position: absolute; left: 1px; top: -6px; bottom: 2px; width: 1px;
+      background: var(--line);
+    }
+    .tag-card {
+      position: relative; width: calc(100% - 10px); min-height: 134px; margin: 0 0 14px 14px;
+      padding: 18px 18px 17px 39px; cursor: pointer; text-align: left;
+      background: var(--cream-light); clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px, 12px 0);
+      box-shadow: 0 7px 15px rgba(68,45,25,.07); transition: transform .18s ease, background .18s ease;
+    }
+    .tag-card:hover { transform: translateX(3px); background: #fbf4e7; }
+    .tag-card:before {
+      content:""; position: absolute; left: 17px; top: 19px; width: 11px; height: 11px;
+      border-radius: 50%; background: var(--cream); box-shadow: 0 0 0 1px var(--line);
+    }
+    .tag-card:after {
+      content:""; position: absolute; left: 22px; top: 31px; width: 1px; height: 31px;
+      background: var(--line); transform: rotate(7deg);
+    }
+    .tag-kind { color: var(--cinnabar); font-size: 10px; font-weight: 700; letter-spacing: .1em; }
+    .tag-main { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 9px; gap: 12px; }
+    .tag-main h3 { font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 23px; font-weight: 600; margin-bottom: 5px; }
+    .tag-main p { color: var(--muted); font-size: 10px; letter-spacing: .04em; }
+    .tag-count { display: flex; align-items: baseline; gap: 3px; white-space: nowrap; }
+    .tag-count strong { font-family: Georgia, serif; font-size: 51px; line-height: .76; letter-spacing: -.07em; font-weight: 400; }
+    .tag-count small { font-size: 10px; color: var(--muted); }
+    .past-tag .tag-count strong { color: #85715f; }
+    .tag-foot { margin-top: 7px; color: var(--muted); font-size: 10px; }
+    .back { min-height: 48px; display: inline-flex; align-items: center; gap: 8px; background: transparent; cursor: pointer; color: var(--muted); font-size: 12px; }
+    .back:hover { color: var(--cocoa); }
+    .detail { padding-top: 8px; }
+    .hanging-tag {
+      position: relative; margin: 29px 7px 0; padding: 50px 28px 29px; background: var(--cream-light);
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px, 16px 0);
+      min-height: 466px;
+    }
+    .hanging-tag:before {
+      content:""; position: absolute; top: -29px; left: 50%; width: 1px; height: 42px;
+      background: var(--cinnabar); transform: translateX(-50%);
+    }
+    .hanging-tag:after {
+      content:""; position: absolute; top: 25px; left: 50%; transform: translateX(-50%);
+      width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line); background: var(--cream);
+    }
+    .detail-kind { text-align: center; color: var(--cinnabar); font-size: 10px; font-weight: 800; letter-spacing: .13em; }
+    .detail-count { text-align: center; margin: 18px 0 17px; font-family: Georgia, serif; font-size: 141px; line-height: .77; letter-spacing: -.085em; font-weight: 400; }
+    .detail-name { text-align: center; font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 33px; line-height: 1.2; font-weight: 600; }
+    .detail-date { text-align: center; color: var(--muted); margin-top: 9px; font-size: 11px; }
+    .detail-note { margin: 31px 7px 0; padding-top: 17px; border-top: 1px dashed var(--line); text-align: center; color: #685544; font-size: 13px; line-height: 1.75; }
+    .detail-actions { display: flex; gap: 9px; margin-top: 25px; }
+    .primary, .quiet { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 16px; cursor: pointer; transition: background .16s ease; }
+    .primary { background: var(--cinnabar); color: #fff8ec; }
+    .primary:hover { background: #913b26; }
+    .quiet { border: 1px solid var(--line); background: transparent; }
+    .quiet:hover { background: rgba(45,33,26,.04); }
+    .editor-title { font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 30px; line-height: 1.24; margin: 17px 0 25px; font-weight: 600; }
+    .tag-form { background: var(--cream-light); padding: 22px 19px 17px; position: relative; }
+    .tag-form:after { content:""; position: absolute; right: 0; bottom: 0; width: 17px; height: 17px; background: linear-gradient(135deg, transparent 50%, var(--cream) 51%); }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; color: var(--muted); font-size: 10px; letter-spacing: .08em; margin-bottom: 6px; }
+    .tag-input { width: 100%; min-height: 46px; border: 0; border-bottom: 1px solid var(--line); background: transparent; outline: none; font-size: 15px; }
+    .tag-input:focus { border-bottom-color: var(--cinnabar); }
+    textarea.tag-input { resize: none; min-height: 58px; line-height: 1.55; }
+    .color-row { display: flex; gap: 12px; }
+    .color-choice {
+      width: 48px; height: 48px; border-radius: 50%; cursor: pointer; border: 7px solid var(--cream-light);
+      outline: 1px solid transparent;
+    }
+    .color-choice.selected { outline-color: var(--cocoa); }
+    .form-preview { margin-top: 23px; border-top: 1px dashed var(--line); padding-top: 16px; }
+    .form-preview span { color: var(--muted); font-size: 10px; }
+    .form-preview p { margin-top: 7px; font-family: "Noto Serif SC", Georgia, serif; font-size: 17px; }
+    .form-preview b { font-family: Georgia, serif; color: var(--cinnabar); font-size: 33px; font-weight: 400; }
+    .form-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 23px; }
+    .empty { min-height: 680px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .empty-tag {
+      width: 104px; height: 132px; background: var(--cream-light); position: relative; margin-bottom: 31px;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px, 14px 0);
+      display: grid; place-items: center; font-family: Georgia, serif; font-size: 39px; color: var(--cinnabar);
+    }
+    .empty-tag:before { content:""; position: absolute; top: 23px; left: 50%; transform: translateX(-50%); width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--line); }
+    .empty-tag:after { content:""; position: absolute; top: -31px; left: 50%; width: 1px; height: 32px; background: var(--cinnabar); }
+    .empty h2 { font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 27px; line-height: 1.36; margin-bottom: 11px; font-weight: 600; }
+    .empty p { color: var(--muted); font-size: 12px; line-height: 1.8; margin-bottom: 24px; }
+    .desktop {
+      min-height: 744px; padding: 22px; position: relative;
+      background: #d8c8ad;
+      background-image: radial-gradient(rgba(45,33,26,.08) .7px, transparent .7px);
+      background-size: 17px 17px;
+    }
+    .desktop-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; }
+    .desktop-head strong { font-family: Georgia, serif; font-size: 32px; font-weight: 400; }
+    .desktop-head span { color: var(--muted); font-size: 11px; letter-spacing: .08em; }
+    .desktop-widget {
+      position: relative; min-height: 138px; background: var(--cream-light); padding: 18px 19px 18px 43px;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px, 14px 0);
+      cursor: pointer; transition: transform .18s ease;
+    }
+    .desktop-widget.large { min-height: 242px; }
+    .desktop-widget:hover { transform: translateY(-2px); }
+    .desktop-widget:before { content:""; position: absolute; left: 19px; top: 21px; width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--line); background: var(--cream); }
+    .widget-head { display: flex; align-items: center; justify-content: space-between; }
+    .widget-head span { color: var(--cinnabar); font-family: Georgia, serif; font-size: 11px; font-weight: 700; letter-spacing: .07em; }
+    .widget-head small { color: var(--muted); font-size: 10px; }
+    .widget-body { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 15px; }
+    .widget-body strong { font-family: Georgia, serif; font-size: 69px; line-height: .78; letter-spacing: -.06em; font-weight: 400; }
+    .widget-body div { text-align: right; padding-bottom: 1px; }
+    .widget-body h3 { font-family: "Noto Serif SC", Georgia, serif; font-size: 20px; font-weight: 600; }
+    .widget-body p { color: var(--muted); font-size: 10px; margin-top: 5px; }
+    .widget-extra { margin-top: 25px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 12px; line-height: 1.7; }
+    .size-row { display: flex; gap: 8px; margin-top: 27px; }
+    .size-row button { min-height: 44px; padding: 0 14px; background: rgba(248,239,223,.72); cursor: pointer; }
+    .size-row button.selected { background: var(--cinnabar); color: #fff8ec; }
+    .hint { margin-top: 35px; color: #604e3e; font-size: 12px; line-height: 1.8; max-width: 280px; }
+    .toast { position: absolute; bottom: 27px; left: 50%; transform: translateX(-50%); background: var(--cocoa); color: #fff8ec; padding: 10px 15px; font-size: 12px; white-space: nowrap; z-index: 30; }
+    .screen[data-screen="editor"] { padding-top: 16px; padding-bottom: 18px; }
+    .screen[data-screen="editor"] .topline { margin-bottom: 11px; }
+    .screen[data-screen="editor"] .editor-title { margin: 7px 0 15px; }
+    .screen[data-screen="editor"] .field { margin-bottom: 11px; }
+    .screen[data-screen="editor"] .form-actions { margin-top: 14px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+    const tagFrameStyles = {
+      wrapper: { display: 'inline-block', padding: 10, background: '#191919', borderRadius: 44, boxShadow: '0 0 0 2px #292929, 0 22px 46px rgba(65,45,28,.24)', position: 'relative' },
+      screen: { position: 'relative', borderRadius: 36, overflow: 'hidden', background: '#f0e4cc' },
+      statusBar: { position: 'absolute', top: 0, left: 0, right: 0, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', fontSize: 12, fontWeight: 600, fontFamily: 'sans-serif', zIndex: 20, pointerEvents: 'none', color: '#1a1a1a' },
+      punchHole: { position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', width: 14, height: 14, background: '#000', borderRadius: '50%', zIndex: 30 },
+      content: { position: 'absolute', top: 32, left: 0, right: 0, bottom: 24, overflow: 'auto', background: '#f0e4cc' },
+      navBar: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+    };
+    function AndroidFrame({ children, width = 390, height = 800 }) {
+      return (
+        <div style={tagFrameStyles.wrapper} data-testid="android-frame">
+          <div style={{ ...tagFrameStyles.screen, width, height }}>
+            <div style={tagFrameStyles.statusBar}>
+              <span>9:41</span>
+              <div className="status-icons">
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor" aria-hidden="true"><rect y="6" width="2" height="4" rx=".5" /><rect x="4" y="4" width="2" height="6" rx=".5" /><rect x="8" y="2" width="2" height="8" rx=".5" /><rect x="12" width="2" height="10" rx=".5" /></svg>
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M7 9a1 1 0 100-2 1 1 0 000 2z" fill="currentColor" /><path d="M3 6a5 5 0 018 0M.5 3.5a11 11 0 0113 0" stroke="currentColor" strokeWidth="1.2" /></svg>
+                <div className="battery"><div style={{ width: '88%' }} /></div>
+              </div>
+            </div>
+            <div style={tagFrameStyles.punchHole} />
+            <div style={tagFrameStyles.content}>{children}</div>
+            <div style={tagFrameStyles.navBar}><span /></div>
+          </div>
+        </div>
+      );
+    }
+
+    const tagEvents = [
+      { id: 1, title: '旅行', date: '2026.12.12', kind: '还有', days: 40, dir: 'north', note: '去看海。把工作留在离海很远的地方。' },
+      { id: 2, title: '和阿岚见面', date: '2026.11.08', kind: '还有', days: 6, dir: 'north', note: '老地方，下午三点。' },
+      { id: 3, title: '搬进新家', date: '2025.09.20', kind: '已经', days: 408, dir: 'south', note: '第一晚只煮了一碗面，但灯终于属于自己。' },
+    ];
+
+    function Plus() { return <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 2v14M2 9h14" stroke="currentColor" strokeWidth="1.5" /></svg>; }
+    function Back() { return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" /></svg>; }
+    function Pin() { return <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><rect x="2.2" y="2.2" width="10.6" height="10.6" rx=".8" stroke="currentColor" /><path d="M7.5 4.5v6M4.5 7.5h6" stroke="currentColor" /></svg>; }
+
+    function TagHome({ events, onOpen, onCreate }) {
+      return (
+        <div className="screen" data-screen="home">
+          <div className="topline"><span className="brand">DAYTAG</span><button className="add-button" onClick={onCreate} data-testid="home-create" aria-label="新建日子"><Plus /></button></div>
+          <h1 className="tag-title">把重要的日子<br /><em>挂在眼前</em></h1>
+          <p className="intro-copy">2026.11.02 · 三个正在被记住的日子</p>
+          <div className="tag-stack">
+            {events.map(event => (
+              <button className={`tag-card ${event.dir === 'south' ? 'past-tag' : ''}`} key={event.id} data-testid={`event-${event.id}`} onClick={() => onOpen(event)}>
+                <span className="tag-kind">{event.kind === '还有' ? 'NEXT DAY · 倒数' : 'SINCE · 已经'}</span>
+                <div className="tag-main">
+                  <div><h3>{event.title}</h3><p>{event.date}</p></div>
+                  <div className="tag-count"><strong>{event.days}</strong><small>天</small></div>
+                </div>
+                <div className="tag-foot">{event.dir === 'south' ? '从这一天开始，生活有了新的地址' : '这一页，正在慢慢靠近'}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function TagDetail({ event, onBack, onEdit }) {
+      const [pinned, setPinned] = useState(false);
+      return (
+        <div className="screen detail" data-screen="detail">
+          <button className="back" onClick={onBack}><Back /> 所有日子</button>
+          <div className="hanging-tag">
+            <div className="detail-kind">{event.kind === '还有' ? '距离这一天' : '从这一天起'}</div>
+            <div className="detail-count">{event.days}</div>
+            <h2 className="detail-name">{event.title}</h2>
+            <div className="detail-date">{event.date} · {event.kind === '还有' ? '还有 ' + event.days + ' 天' : '已经 ' + event.days + ' 天'}</div>
+            <p className="detail-note">{event.note}</p>
+          </div>
+          <div className="detail-actions"><button className="primary" onClick={() => setPinned(true)}><Pin /> 添加到桌面</button><button className="quiet" onClick={onEdit}>编辑</button></div>
+          {pinned && <div className="toast">日期吊牌已准备</div>}
+        </div>
+      );
+    }
+
+    function TagEditor({ onCancel, onSave }) {
+      const [title, setTitle] = useState('新的日子');
+      const [note, setNote] = useState('');
+      const [color, setColor] = useState('#a6442b');
+      return (
+        <div className="screen" data-screen="editor">
+          <div className="topline"><button className="back" onClick={onCancel}><Back /> 返回</button><span className="brand">NEW TAG</span></div>
+          <h2 className="editor-title">做一枚<br />只属于你的日期吊牌</h2>
+          <div className="tag-form">
+            <div className="field"><label htmlFor="tag-title">吊牌上写什么？</label><input id="tag-title" className="tag-input" value={title} maxLength={40} onChange={e => setTitle(e.target.value)} data-testid="editor-title" /></div>
+            <div className="field"><label htmlFor="tag-date">目标日期</label><input id="tag-date" className="tag-input" type="date" defaultValue="2027-01-01" /></div>
+            <div className="field"><label htmlFor="tag-note">背后的注脚（可选）</label><textarea id="tag-note" className="tag-input" value={note} maxLength={120} onChange={e => setNote(e.target.value)} placeholder="为什么记住这一天？" /></div>
+            <div className="field"><label>标签颜色</label><div className="color-row">{[ '#a6442b', '#667352', '#976a43', '#4b586c' ].map(c => <button key={c} className={`color-choice ${color === c ? 'selected' : ''}`} style={{ background: c }} onClick={() => setColor(c)} aria-label={`颜色 ${c}`} />)}</div></div>
+            <div className="form-preview"><span>吊牌预览</span><p>距离「{title || '未命名'}」还有 <b>24</b> 天</p></div>
+          </div>
+          <div className="form-actions"><button className="quiet" onClick={onCancel}>取消</button><button className="primary" data-testid="editor-save" onClick={() => onSave({ title: title || '未命名', date: '2027.01.01', kind: '还有', days: 24, dir: 'north', note: note || '这一天，值得被记住。' })}>挂上这枚吊牌</button></div>
+        </div>
+      );
+    }
+
+    function TagEmpty({ onCreate }) {
+      return (
+        <div className="screen empty" data-screen="empty">
+          <div className="empty-tag" aria-hidden="true">01</div>
+          <h2>还没有挂上<br />任何日子</h2>
+          <p>把期待、纪念与开始，<br />做成一枚看得见的吊牌。</p>
+          <button className="primary" data-testid="empty-create" onClick={onCreate}>做第一枚吊牌</button>
+        </div>
+      );
+    }
+
+    function TagWidget() {
+      const [large, setLarge] = useState(false);
+      return (
+        <div className="desktop" data-screen="widget">
+          <div className="desktop-head"><strong>11:02</strong><span>桌面预览</span></div>
+          <div className={`desktop-widget ${large ? 'large' : ''}`} data-testid="widget-card">
+            <div className="widget-head"><span>DAYTAG</span><small>12.12</small></div>
+            <div className="widget-body"><strong>40</strong><div><h3>旅行</h3><p>还有 · 天</p></div></div>
+            {large && <div className="widget-extra">去看海。把工作留在离海很远的地方。</div>}
+          </div>
+          <div className="size-row"><button className={!large ? 'selected' : ''} onClick={() => setLarge(false)}>2 × 1</button><button className={large ? 'selected' : ''} onClick={() => setLarge(true)}>4 × 2</button></div>
+          <p className="hint">一枚吊牌，只记住一个日子。长按桌面添加更多 DayTag 小部件。</p>
+        </div>
+      );
+    }
+
+    function TagPhone({ initial = 'home', label }) {
+      const [screen, setScreen] = useState(initial);
+      const [events, setEvents] = useState(tagEvents);
+      const [active, setActive] = useState(tagEvents[0]);
+      const open = event => { setActive(event); setScreen('detail'); };
+      const save = event => { setEvents(prev => [event, ...prev]); setActive(event); setScreen('detail'); };
+      let content;
+      if (screen === 'detail') content = <TagDetail event={active} onBack={() => setScreen('home')} onEdit={() => setScreen('editor')} />;
+      else if (screen === 'editor') content = <TagEditor onCancel={() => setScreen('home')} onSave={save} />;
+      else if (screen === 'empty') content = <TagEmpty onCreate={() => setScreen('editor')} />;
+      else if (screen === 'widget') content = <TagWidget />;
+      else content = <TagHome events={events} onOpen={open} onCreate={() => setScreen('editor')} />;
+      return <div className="phone-card"><div className="phone-label"><b>{label}</b><span>日期吊牌 · 可点击</span></div><AndroidFrame>{content}</AndroidFrame></div>;
+    }
+
+    function App() {
+      return (
+        <main className="showcase">
+          <header className="showcase-head">
+            <div><div className="eyebrow">Direction 03 · Date Tag</div><h1>日期吊牌 <i>/</i> 把一天挂在眼前</h1></div>
+            <p className="showcase-copy">
+              从旅行吊牌、档案签条和行李箱标签中生长出的形式。每个事件都是一枚有打孔、切角和细绳的<strong>独立日期吊牌</strong>，
+              信息像印刷在纸上的记录。适合希望产品更有物件感、记忆点更强的人。
+            </p>
+          </header>
+          <section className="gallery" aria-label="日期吊牌五个界面">
+            <TagPhone initial="home" label="01 / 首页" />
+            <TagPhone initial="detail" label="02 / 事件详情" />
+            <TagPhone initial="editor" label="03 / 制作新吊牌" />
+            <TagPhone initial="empty" label="04 / 空状态" />
+            <TagPhone initial="widget" label="05 / 桌面小部件" />
+          </section>
+        </main>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

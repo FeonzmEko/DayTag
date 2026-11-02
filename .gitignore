@@ -1,0 +1,23 @@
+# Android / Gradle
+.gradle/
+build/
+**/build/
+local.properties
+*.iml
+.idea/
+.kotlin/
+
+# Signing and local secrets
+*.jks
+*.keystore
+keystore.properties
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Generated QA output
+.playwright/
+node_modules/
+

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DayTag · 暖雾留白</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --mist: #f6f1e8;
+      --mist-deep: #e9e1d5;
+      --ink: #312c26;
+      --muted: #797167;
+      --sage: #586b54;
+      --sage-soft: #dfe5d9;
+      --line: rgba(49,44,38,.14);
+    }
+    html, body { min-width: 1600px; min-height: 100%; }
+    body {
+      background: #e7e0d5;
+      color: var(--ink);
+      font-family: "Noto Sans SC", "WenQuanYi Zen Hei", sans-serif;
+    }
+    button, input, textarea { font: inherit; color: inherit; }
+    button { border: 0; }
+    .showcase { width: 1600px; margin: 0 auto; padding: 48px 72px 74px; }
+    .showcase-head {
+      display: grid; grid-template-columns: 1fr 520px; gap: 64px; align-items: end;
+      padding-bottom: 34px; border-bottom: 1px solid rgba(49,44,38,.18);
+    }
+    .eyebrow { color: var(--sage); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700; margin-bottom: 15px; }
+    h1 {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+      font-size: 62px; line-height: 1.06; letter-spacing: -.045em; font-weight: 600;
+    }
+    h1 i { font-style: normal; color: var(--sage); }
+    .showcase-copy { color: #665e54; font-size: 16px; line-height: 1.85; max-width: 510px; }
+    .showcase-copy strong { color: var(--ink); font-weight: 600; }
+    .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 44px 38px; padding-top: 40px; }
+    .phone-card { width: 432px; }
+    .phone-label { display: flex; justify-content: space-between; align-items: baseline; margin: 0 12px 11px; color: #6f675e; font-size: 12px; letter-spacing: .07em; }
+    .phone-label b { color: var(--ink); font-size: 13px; letter-spacing: 0; font-weight: 600; }
+    .android-wrap {
+      display: inline-block; padding: 10px; background: #191919; border-radius: 44px;
+      box-shadow: 0 0 0 2px #292929, 0 22px 46px rgba(63,54,43,.22); position: relative;
+    }
+    .android-screen { position: relative; border-radius: 36px; overflow: hidden; background: var(--mist); }
+    .status-bar {
+      position: absolute; top: 0; left: 0; right: 0; height: 32px; display: flex;
+      align-items: center; justify-content: space-between; padding: 0 24px;
+      font-family: sans-serif; font-size: 12px; font-weight: 600; z-index: 20; pointer-events: none;
+    }
+    .punch-hole { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; border-radius: 50%; background: #000; z-index: 30; }
+    .status-icons { display: flex; align-items: center; gap: 5px; }
+    .battery { width: 20px; height: 9px; border: 1.4px solid currentColor; border-radius: 2px; padding: 1px; }
+    .battery > div { height: 100%; background: currentColor; border-radius: 1px; }
+    .android-content { position: absolute; top: 32px; left: 0; right: 0; bottom: 24px; overflow: auto; background: var(--mist); }
+    .android-nav { position: absolute; bottom: 0; left: 0; right: 0; height: 24px; display: flex; align-items: center; justify-content: center; z-index: 10; }
+    .android-nav span { width: 94px; height: 4px; background: rgba(49,44,38,.36); border-radius: 9px; }
+    .screen { min-height: 744px; padding: 25px 25px 30px; position: relative; overflow: hidden; }
+    .topline { display: flex; justify-content: space-between; align-items: center; min-height: 48px; margin-bottom: 25px; }
+    .wordmark { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 700; letter-spacing: .11em; }
+    .wordmark:before { content:""; width: 9px; height: 9px; border-radius: 50%; background: var(--sage); }
+    .icon-button {
+      width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%;
+      background: var(--sage-soft); color: var(--sage); cursor: pointer; transition: transform .17s ease;
+    }
+    .icon-button:hover { transform: scale(1.04); }
+    .greeting { color: var(--muted); font-size: 13px; margin-bottom: 7px; }
+    .hero-title {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 35px; line-height: 1.25;
+      font-weight: 600; letter-spacing: -.03em;
+    }
+    .hero-title span { color: var(--sage); }
+    .morning-mark {
+      width: 132px; height: 132px; border-radius: 50%; background: #eadfcf;
+      position: absolute; right: -26px; top: 91px; opacity: .72; pointer-events: none;
+    }
+    .next-event {
+      margin-top: 37px; padding: 24px 0 27px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      position: relative; cursor: pointer;
+    }
+    .next-event:hover .next-name { color: var(--sage); }
+    .event-kicker { font-size: 11px; letter-spacing: .12em; color: var(--sage); font-weight: 700; }
+    .next-name {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 31px;
+      line-height: 1.25; margin: 8px 0 16px; font-weight: 600; transition: color .18s ease;
+    }
+    .next-number { display: flex; align-items: flex-end; gap: 7px; }
+    .next-number strong { font-family: Georgia, serif; font-size: 106px; line-height: .78; font-weight: 400; letter-spacing: -.075em; }
+    .next-number span { color: var(--muted); font-size: 13px; padding-bottom: 7px; }
+    .next-date { position: absolute; right: 0; bottom: 28px; color: var(--muted); font-size: 11px; }
+    .small-event-list { margin-top: 8px; }
+    .small-event {
+      width: 100%; min-height: 76px; display: flex; align-items: center; gap: 14px;
+      border-bottom: 1px solid var(--line); background: transparent; text-align: left; cursor: pointer;
+    }
+    .small-event:hover h3 { color: var(--sage); }
+    .event-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sage); flex: none; }
+    .small-event .past-dot { background: #b4aa9d; }
+    .small-event h3 { font-size: 15px; font-weight: 600; margin-bottom: 3px; transition: color .18s ease; }
+    .small-event p { color: var(--muted); font-size: 11px; }
+    .small-event .small-days { margin-left: auto; font-family: Georgia, serif; font-size: 26px; color: var(--ink); }
+    .small-event .small-days small { font-family: "Noto Sans SC", sans-serif; font-size: 10px; color: var(--muted); margin-left: 2px; }
+    .caption { margin-top: 24px; color: var(--muted); font-size: 11px; line-height: 1.7; }
+    .back-button { min-height: 48px; display: inline-flex; align-items: center; gap: 7px; background: transparent; cursor: pointer; color: var(--muted); font-size: 13px; }
+    .back-button:hover { color: var(--ink); }
+    .detail-screen { display: flex; flex-direction: column; }
+    .detail-spacer { height: 23px; }
+    .detail-kind { color: var(--sage); letter-spacing: .13em; font-size: 11px; font-weight: 700; }
+    .detail-hero { margin-top: 17px; position: relative; }
+    .detail-hero:after {
+      content:""; position: absolute; width: 180px; height: 180px; border-radius: 50%;
+      background: #eadfcf; right: -71px; top: 14px; z-index: -1;
+    }
+    .detail-days { font-family: Georgia, serif; font-size: 144px; line-height: .78; letter-spacing: -.085em; font-weight: 400; }
+    .detail-unit { font-size: 14px; color: var(--muted); margin: 13px 0 0 7px; }
+    .detail-name {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 38px; line-height: 1.18;
+      margin-top: 29px; font-weight: 600;
+    }
+    .detail-date { margin-top: 9px; color: var(--muted); font-size: 12px; letter-spacing: .06em; }
+    .detail-note {
+      margin-top: 35px; background: #efe8dc; padding: 20px; color: #5e574d;
+      font-size: 14px; line-height: 1.85;
+    }
+    .detail-actions { display: flex; gap: 10px; margin-top: auto; padding-top: 25px; }
+    .primary, .quiet { min-height: 48px; padding: 0 18px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background .16s ease, transform .16s ease; }
+    .primary { background: var(--sage); color: #fff; }
+    .primary:hover { background: #4c5e49; }
+    .quiet { background: var(--sage-soft); color: var(--sage); }
+    .primary:active, .quiet:active { transform: translateY(1px); }
+    .editor-title { font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 31px; line-height: 1.24; margin: 18px 0 29px; font-weight: 600; }
+    .field { margin-bottom: 21px; }
+    .field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 8px; letter-spacing: .06em; }
+    .soft-input {
+      width: 100%; min-height: 48px; border: 1px solid transparent; background: #efe8dc;
+      padding: 11px 13px; outline: none; font-size: 15px;
+    }
+    .soft-input:focus { border-color: var(--sage); background: #f3ede3; }
+    textarea.soft-input { min-height: 76px; resize: none; line-height: 1.55; }
+    .color-row { display: flex; gap: 13px; padding-top: 2px; }
+    .color-choice {
+      width: 48px; height: 48px; border-radius: 50%; cursor: pointer; border: 7px solid var(--mist);
+      outline: 1px solid transparent; transition: outline .17s ease;
+    }
+    .color-choice.selected { outline-color: var(--ink); }
+    .live-preview { padding: 18px; background: #e9eee4; margin-top: 6px; }
+    .live-preview span { color: var(--muted); font-size: 10px; letter-spacing: .8px; }
+    .live-preview p { margin-top: 10px; font-family: "Noto Serif SC", Georgia, serif; font-size: 18px; line-height: 1.5; }
+    .live-preview b { color: var(--sage); font-family: Georgia, serif; font-size: 28px; font-weight: 400; }
+    .editor-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; }
+    .empty { min-height: 680px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .empty-sun {
+      width: 118px; height: 118px; border-radius: 50%; background: #eadfcf; display: grid; place-items: center;
+      color: var(--sage); font-family: Georgia, serif; font-size: 42px; margin-bottom: 29px;
+    }
+    .empty h2 { font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 29px; line-height: 1.35; margin-bottom: 11px; font-weight: 600; }
+    .empty p { color: var(--muted); font-size: 13px; line-height: 1.8; margin-bottom: 24px; }
+    .desktop {
+      min-height: 744px; padding: 22px; position: relative;
+      background: linear-gradient(162deg, #d8dfd2 0%, #ece6d9 48%, #ddd1c0 100%);
+    }
+    .desktop-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 38px; color: #4f5749; }
+    .desktop-head strong { font-family: Georgia, serif; font-size: 32px; font-weight: 400; }
+    .desktop-head span { font-size: 11px; letter-spacing: .08em; }
+    .widget {
+      min-height: 134px; background: rgba(246,241,232,.96); padding: 19px;
+      box-shadow: 0 16px 27px rgba(54,64,47,.15); cursor: pointer; transition: transform .18s ease;
+    }
+    .widget.large { min-height: 250px; }
+    .widget:hover { transform: translateY(-2px); }
+    .widget-head { display: flex; align-items: center; justify-content: space-between; }
+    .widget-head span { display: flex; align-items: center; gap: 6px; color: var(--sage); font-size: 10px; font-weight: 700; letter-spacing: .1em; }
+    .widget-head span:before { content:""; width: 7px; height: 7px; border-radius: 50%; background: var(--sage); }
+    .widget-head small { color: var(--muted); font-size: 10px; }
+    .widget-main { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 14px; }
+    .widget-main strong { font-family: Georgia, serif; font-size: 72px; line-height: .78; letter-spacing: -.06em; font-weight: 400; }
+    .widget-copy { text-align: right; padding-bottom: 2px; }
+    .widget-copy h3 { font-family: "Noto Serif SC", Georgia, serif; font-size: 20px; font-weight: 600; }
+    .widget-copy p { color: var(--muted); font-size: 10px; margin-top: 5px; }
+    .widget-note { margin-top: 23px; padding-top: 17px; border-top: 1px solid var(--line); font-size: 12px; line-height: 1.7; color: #625b51; }
+    .size-row { display: flex; gap: 8px; margin-top: 26px; }
+    .size-row button { min-height: 44px; padding: 0 14px; background: rgba(246,241,232,.77); cursor: pointer; }
+    .size-row button.selected { background: var(--sage); color: #fff; }
+    .desktop-hint { margin-top: 35px; color: #53604e; font-size: 12px; line-height: 1.75; max-width: 280px; }
+    .toast { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--mist); padding: 10px 15px; font-size: 12px; white-space: nowrap; z-index: 30; }
+    .screen[data-screen="editor"] { padding-top: 17px; padding-bottom: 20px; }
+    .screen[data-screen="editor"] .topline { margin-bottom: 13px; }
+    .screen[data-screen="editor"] .editor-title { margin: 8px 0 17px; }
+    .screen[data-screen="editor"] .field { margin-bottom: 12px; }
+    .screen[data-screen="editor"] .live-preview { padding: 14px; }
+    .screen[data-screen="editor"] .editor-actions { margin-top: 17px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+    const warmFrameStyles = {
+      wrapper: { display: 'inline-block', padding: 10, background: '#191919', borderRadius: 44, boxShadow: '0 0 0 2px #292929, 0 22px 46px rgba(63,54,43,.22)', position: 'relative' },
+      screen: { position: 'relative', borderRadius: 36, overflow: 'hidden', background: '#f6f1e8' },
+      statusBar: { position: 'absolute', top: 0, left: 0, right: 0, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', fontSize: 12, fontWeight: 600, fontFamily: 'sans-serif', zIndex: 20, pointerEvents: 'none', color: '#1a1a1a' },
+      punchHole: { position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', width: 14, height: 14, background: '#000', borderRadius: '50%', zIndex: 30 },
+      content: { position: 'absolute', top: 32, left: 0, right: 0, bottom: 24, overflow: 'auto', background: '#f6f1e8' },
+      navBar: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
+    };
+    function AndroidFrame({ children, width = 390, height = 800 }) {
+      return (
+        <div style={warmFrameStyles.wrapper} data-testid="android-frame">
+          <div style={{ ...warmFrameStyles.screen, width, height }}>
+            <div style={warmFrameStyles.statusBar}>
+              <span>9:41</span>
+              <div className="status-icons">
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor" aria-hidden="true"><rect y="6" width="2" height="4" rx=".5" /><rect x="4" y="4" width="2" height="6" rx=".5" /><rect x="8" y="2" width="2" height="8" rx=".5" /><rect x="12" width="2" height="10" rx=".5" /></svg>
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M7 9a1 1 0 100-2 1 1 0 000 2z" fill="currentColor" /><path d="M3 6a5 5 0 018 0M.5 3.5a11 11 0 0113 0" stroke="currentColor" strokeWidth="1.2" /></svg>
+                <div className="battery"><div style={{ width: '88%' }} /></div>
+              </div>
+            </div>
+            <div style={warmFrameStyles.punchHole} />
+            <div style={warmFrameStyles.content}>{children}</div>
+            <div style={warmFrameStyles.navBar}><span /></div>
+          </div>
+        </div>
+      );
+    }
+
+    const warmEvents = [
+      { id: 1, title: '旅行', date: '12 月 12 日', kind: '还有', days: 40, dir: 'north', note: '去看海。把工作留在离海很远的地方。' },
+      { id: 2, title: '和阿岚见面', date: '11 月 8 日', kind: '还有', days: 6, dir: 'north', note: '老地方，下午三点。' },
+      { id: 3, title: '搬进新家', date: '2025 年 9 月 20 日', kind: '已经', days: 408, dir: 'south', note: '第一晚只煮了一碗面，但灯终于属于自己。' },
+    ];
+
+    function Plus() { return <svg width="19" height="19" viewBox="0 0 19 19" fill="none" aria-hidden="true"><path d="M9.5 2v15M2 9.5h15" stroke="currentColor" strokeWidth="1.7" /></svg>; }
+    function Back() { return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" /></svg>; }
+    function Pin() { return <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true"><path d="M7.5 1.8v5.1M5 4.3h5M3 8.5h9v4.7H3z" stroke="currentColor" strokeWidth="1.2" /></svg>; }
+
+    function WarmHome({ events, onOpen, onCreate }) {
+      return (
+        <div className="screen" data-screen="home">
+          <div className="topline"><span className="wordmark">DAYTAG</span><button className="icon-button" onClick={onCreate} data-testid="home-create" aria-label="新建日子"><Plus /></button></div>
+          <p className="greeting">星期一 · 11 月 2 日</p>
+          <h1 className="hero-title">今天也有<br /><span>值得期待的事</span></h1>
+          <div className="morning-mark" />
+          <div className="next-event" data-testid="event-1" onClick={() => onOpen(events[0])}>
+            <span className="event-kicker">下一件 · 还有 40 天</span>
+            <h2 className="next-name">旅行</h2>
+            <div className="next-number"><strong>40</strong><span>天</span></div>
+            <span className="next-date">2026 / 12 / 12</span>
+          </div>
+          <div className="small-event-list">
+            {events.slice(1).map(event => (
+              <button className="small-event" key={event.id} onClick={() => onOpen(event)}>
+                <span className={`event-dot ${event.dir === 'south' ? 'past-dot' : ''}`} />
+                <span><h3>{event.title}</h3><p>{event.date}</p></span>
+                <span className="small-days">{event.days}<small>天</small></span>
+              </button>
+            ))}
+          </div>
+          <p className="caption">只留下真正重要的日期。其余时间，留给生活。</p>
+        </div>
+      );
+    }
+
+    function WarmDetail({ event, onBack, onEdit }) {
+      const [pinned, setPinned] = useState(false);
+      return (
+        <div className="screen detail-screen" data-screen="detail">
+          <button className="back-button" onClick={onBack}><Back /> 所有日子</button>
+          <div className="detail-spacer" />
+          <span className="detail-kind">{event.kind === '还有' ? '距离这一天' : '从这一天起'}</span>
+          <div className="detail-hero">
+            <div className="detail-days">{event.days}</div>
+            <div className="detail-unit">天</div>
+          </div>
+          <h2 className="detail-name">{event.title}</h2>
+          <p className="detail-date">{event.date}</p>
+          <p className="detail-note">{event.note}</p>
+          <div className="detail-actions">
+            <button className="primary" onClick={() => setPinned(true)}><Pin /> 添加到桌面</button>
+            <button className="quiet" onClick={onEdit}>编辑</button>
+          </div>
+          {pinned && <div className="toast">小部件已准备</div>}
+        </div>
+      );
+    }
+
+    function WarmEditor({ onCancel, onSave }) {
+      const [title, setTitle] = useState('新的日子');
+      const [note, setNote] = useState('');
+      const [color, setColor] = useState('#586b54');
+      return (
+        <div className="screen" data-screen="editor">
+          <div className="topline"><button className="back-button" onClick={onCancel}><Back /> 返回</button><span className="wordmark">新日子</span></div>
+          <h2 className="editor-title">给未来留一个<br />轻轻的记号</h2>
+          <div className="field"><label htmlFor="warm-title">事件名称</label><input id="warm-title" className="soft-input" value={title} maxLength={40} onChange={e => setTitle(e.target.value)} data-testid="editor-title" /></div>
+          <div className="field"><label htmlFor="warm-date">目标日期</label><input id="warm-date" className="soft-input" type="date" defaultValue="2027-01-01" /></div>
+          <div className="field"><label htmlFor="warm-note">备注（可选）</label><textarea id="warm-note" className="soft-input" value={note} maxLength={120} onChange={e => setNote(e.target.value)} placeholder="一句只属于这一天的话" /></div>
+          <div className="field"><label>选择强调色</label><div className="color-row">{[ '#586b54', '#9b6a4b', '#7b6a80', '#4e6b70' ].map(c => <button key={c} className={`color-choice ${color === c ? 'selected' : ''}`} style={{ background: c }} onClick={() => setColor(c)} aria-label={`颜色 ${c}`} />)}</div></div>
+          <div className="live-preview"><span>实时预览</span><p>距离「{title || '未命名'}」还有 <b>24</b> 天</p></div>
+          <div className="editor-actions"><button className="quiet" onClick={onCancel}>取消</button><button className="primary" data-testid="editor-save" onClick={() => onSave({ title: title || '未命名', date: '2027 年 1 月 1 日', kind: '还有', days: 24, dir: 'north', note: note || '给未来留一个轻轻的记号。' })}>保存</button></div>
+        </div>
+      );
+    }
+
+    function WarmEmpty({ onCreate }) {
+      return (
+        <div className="screen empty" data-screen="empty">
+          <div className="empty-sun" aria-hidden="true">01</div>
+          <h2>留白也是一种开始</h2>
+          <p>记录一件正在等待的事，<br />或一段已经发生的生活。</p>
+          <button className="primary" data-testid="empty-create" onClick={onCreate}>写下第一个日子</button>
+        </div>
+      );
+    }
+
+    function WarmWidget() {
+      const [large, setLarge] = useState(false);
+      return (
+        <div className="desktop" data-screen="widget">
+          <div className="desktop-head"><strong>11:02</strong><span>桌面预览</span></div>
+          <div className={`widget ${large ? 'large' : ''}`} data-testid="widget-card">
+            <div className="widget-head"><span>DAYTAG</span><small>12 月 12 日</small></div>
+            <div className="widget-main"><strong>40</strong><div className="widget-copy"><h3>旅行</h3><p>还有 · 天</p></div></div>
+            {large && <div className="widget-note">去看海。把工作留在离海很远的地方。</div>}
+          </div>
+          <div className="size-row"><button className={!large ? 'selected' : ''} onClick={() => setLarge(false)}>2 × 1</button><button className={large ? 'selected' : ''} onClick={() => setLarge(true)}>4 × 2</button></div>
+          <p className="desktop-hint">轻轻放在桌面上，不催促，也不缺席。</p>
+        </div>
+      );
+    }
+
+    function WarmPhone({ initial = 'home', label }) {
+      const [screen, setScreen] = useState(initial);
+      const [events, setEvents] = useState(warmEvents);
+      const [active, setActive] = useState(warmEvents[0]);
+      const open = event => { setActive(event); setScreen('detail'); };
+      const save = event => { setEvents(prev => [event, ...prev]); setActive(event); setScreen('detail'); };
+      let content;
+      if (screen === 'detail') content = <WarmDetail event={active} onBack={() => setScreen('home')} onEdit={() => setScreen('editor')} />;
+      else if (screen === 'editor') content = <WarmEditor onCancel={() => setScreen('home')} onSave={save} />;
+      else if (screen === 'empty') content = <WarmEmpty onCreate={() => setScreen('editor')} />;
+      else if (screen === 'widget') content = <WarmWidget />;
+      else content = <WarmHome events={events} onOpen={open} onCreate={() => setScreen('editor')} />;
+      return <div className="phone-card"><div className="phone-label"><b>{label}</b><span>暖雾留白 · 可点击</span></div><AndroidFrame>{content}</AndroidFrame></div>;
+    }
+
+    function App() {
+      return (
+        <main className="showcase">
+          <header className="showcase-head">
+            <div><div className="eyebrow">Direction 02 · Warm Space</div><h1>暖雾留白 <i>/</i> 安静地看见</h1></div>
+            <p className="showcase-copy">
+              以晨光尚未完全亮起的房间为视觉母题。主事件独占一块<strong>几乎无边框的呼吸区域</strong>，其他日期退到下方；
+              鼠尾草绿负责行动与强调，但不制造催促感。适合希望桌面和 App 都保持安静、轻盈的人。
+            </p>
+          </header>
+          <section className="gallery" aria-label="暖雾留白五个界面">
+            <WarmPhone initial="home" label="01 / 首页" />
+            <WarmPhone initial="detail" label="02 / 事件详情" />
+            <WarmPhone initial="editor" label="03 / 写下新日子" />
+            <WarmPhone initial="empty" label="04 / 空状态" />
+            <WarmPhone initial="widget" label="05 / 桌面小部件" />
+          </section>
+        </main>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

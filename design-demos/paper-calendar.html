@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DayTag · 纸上日历</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --paper: #f4ebdd;
+      --paper-deep: #e9dcc9;
+      --ink: #292621;
+      --muted: #746b5f;
+      --accent: #b64f2e;
+      --hairline: rgba(41, 38, 33, .22);
+    }
+    html, body { min-width: 1600px; min-height: 100%; }
+    body {
+      background:
+        radial-gradient(circle at 16% 9%, rgba(255,255,255,.62), transparent 28%),
+        #ded2bf;
+      color: var(--ink);
+      font-family: "Noto Sans SC", "WenQuanYi Zen Hei", sans-serif;
+      text-rendering: geometricPrecision;
+    }
+    button, input, textarea { font: inherit; color: inherit; }
+    button { border: 0; }
+    .showcase { width: 1600px; margin: 0 auto; padding: 48px 72px 74px; }
+    .showcase-head {
+      display: grid;
+      grid-template-columns: 1fr 520px;
+      gap: 64px;
+      align-items: end;
+      padding-bottom: 34px;
+      border-bottom: 1px solid rgba(41,38,33,.28);
+    }
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: .19em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+    h1 {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+      font-size: 62px;
+      line-height: 1.05;
+      letter-spacing: -.04em;
+      font-weight: 600;
+    }
+    h1 i { color: var(--accent); font-style: normal; }
+    .showcase-copy {
+      color: #5d5449;
+      font-size: 16px;
+      line-height: 1.85;
+      max-width: 510px;
+    }
+    .showcase-copy strong { color: var(--ink); font-weight: 600; }
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 44px 38px;
+      padding-top: 40px;
+    }
+    .phone-card { width: 432px; }
+    .phone-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin: 0 12px 11px;
+      font-size: 12px;
+      color: #665c50;
+      letter-spacing: .08em;
+    }
+    .phone-label b {
+      font-family: "Noto Serif SC", Georgia, serif;
+      color: var(--ink);
+      font-size: 13px;
+      letter-spacing: 0;
+    }
+    .android-wrap {
+      display: inline-block;
+      padding: 10px;
+      background: #1a1a1a;
+      border-radius: 44px;
+      box-shadow: 0 0 0 2px #2a2a2a, 0 22px 46px rgba(71, 52, 30, .24);
+      position: relative;
+    }
+    .android-screen {
+      position: relative;
+      border-radius: 36px;
+      overflow: hidden;
+      background: var(--paper);
+    }
+    .status-bar {
+      position: absolute; top: 0; left: 0; right: 0; height: 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; font-size: 12px; font-weight: 600;
+      font-family: sans-serif; z-index: 20; pointer-events: none;
+    }
+    .punch-hole {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      width: 14px; height: 14px; background: #000; border-radius: 50%; z-index: 30;
+    }
+    .status-icons { display: flex; align-items: center; gap: 5px; }
+    .battery { width: 20px; height: 9px; border: 1.4px solid currentColor; border-radius: 2px; padding: 1px; }
+    .battery > div { height: 100%; width: 88%; background: currentColor; border-radius: 1px; }
+    .android-content {
+      position: absolute; top: 32px; left: 0; right: 0; bottom: 24px;
+      overflow: auto; background: var(--paper);
+    }
+    .android-nav {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 24px;
+      display: flex; align-items: center; justify-content: center; z-index: 10;
+    }
+    .android-nav span { width: 94px; height: 4px; border-radius: 9px; background: rgba(41,38,33,.38); }
+    .screen { min-height: 744px; padding: 25px 24px 30px; position: relative; }
+    .screen-top {
+      display: flex; align-items: center; justify-content: space-between;
+      min-height: 48px; margin-bottom: 22px;
+    }
+    .brandline {
+      font-size: 11px; letter-spacing: .18em; font-weight: 700; color: var(--accent);
+    }
+    .round-button {
+      width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+      background: transparent; border: 1px solid var(--hairline); cursor: pointer;
+      transition: background .18s ease;
+    }
+    .round-button:hover { background: rgba(182,79,46,.08); }
+    .paper-title {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+      font-size: 40px; line-height: 1.2; letter-spacing: -.05em; font-weight: 600;
+    }
+    .paper-title em { color: var(--accent); font-style: normal; }
+    .subline {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--muted); font-size: 12px; line-height: 1.5; margin-top: 12px;
+    }
+    .subline:before { content:""; width: 34px; height: 1px; background: var(--accent); }
+    .rule { height: 1px; background: var(--hairline); margin: 25px 0 0; }
+    .event-list { margin-top: 2px; }
+    .event-row {
+      width: 100%; display: grid; grid-template-columns: 74px 1fr auto;
+      align-items: center; min-height: 102px; padding: 15px 0;
+      border-bottom: 1px solid var(--hairline); background: transparent;
+      text-align: left; cursor: pointer;
+    }
+    .event-row:hover .event-name { color: var(--accent); }
+    .event-kind {
+      color: var(--muted); font-size: 11px; line-height: 1.5; letter-spacing: .08em;
+    }
+    .event-name {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+      font-size: 21px; font-weight: 600; transition: color .18s ease;
+    }
+    .event-date { font-size: 11px; color: var(--muted); margin-top: 5px; letter-spacing: .04em; }
+    .event-days { text-align: right; white-space: nowrap; }
+    .event-days strong {
+      font-family: Georgia, "Times New Roman", serif; font-size: 46px;
+      line-height: .86; letter-spacing: -.07em; font-weight: 500;
+    }
+    .event-days small { font-size: 11px; margin-left: 3px; color: var(--muted); }
+    .event-row.past .event-days strong { color: var(--muted); }
+    .footer-note {
+      display: flex; align-items: center; justify-content: space-between;
+      color: var(--muted); font-size: 11px; margin-top: 26px; letter-spacing: .04em;
+    }
+    .footer-note b { font-weight: 500; color: var(--accent); }
+    .backline {
+      display: flex; align-items: center; gap: 8px; min-height: 48px;
+      background: transparent; cursor: pointer; font-size: 13px; color: var(--muted);
+    }
+    .backline:hover { color: var(--ink); }
+    .detail-wrap { padding-top: 10px; }
+    .detail-kicker { color: var(--accent); font-size: 11px; letter-spacing: .18em; font-weight: 700; }
+    .detail-number {
+      display: flex; align-items: flex-end; gap: 12px; margin: 12px 0 18px;
+      font-family: Georgia, serif; font-size: 142px; line-height: .9;
+      letter-spacing: -.085em; font-weight: 500;
+    }
+    .detail-number small { font-family: "Noto Sans SC", sans-serif; font-size: 17px; padding-bottom: 20px; color: var(--muted); }
+    .detail-title {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+      font-size: 38px; line-height: 1.15; font-weight: 600; letter-spacing: -.035em;
+    }
+    .stamp {
+      display: inline-block; transform: rotate(-3deg); margin: 27px 0 20px;
+      padding: 10px 15px; border: 1.5px solid rgba(182,79,46,.57);
+      color: var(--accent); font-family: Georgia, serif; font-size: 14px; letter-spacing: .06em;
+    }
+    .detail-note {
+      font-size: 14px; line-height: 1.85; color: #61584d;
+      padding: 18px 0; border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline);
+    }
+    .detail-actions { display: flex; gap: 10px; margin-top: 23px; }
+    .button-primary, .button-quiet {
+      min-height: 48px; padding: 0 18px; display: inline-flex; align-items: center;
+      justify-content: center; gap: 8px; cursor: pointer; transition: transform .16s ease, background .16s ease;
+    }
+    .button-primary { background: var(--accent); color: white; }
+    .button-primary:hover { background: #9f4428; }
+    .button-primary:active, .button-quiet:active { transform: translateY(1px); }
+    .button-quiet { border: 1px solid var(--hairline); background: transparent; }
+    .button-quiet:hover { background: rgba(41,38,33,.04); }
+    .form-heading {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+      font-size: 31px; line-height: 1.22; font-weight: 600; margin: 16px 0 26px;
+    }
+    .form-field { margin-bottom: 21px; }
+    .form-label { display: block; font-size: 11px; letter-spacing: .09em; color: var(--muted); margin-bottom: 7px; }
+    .paper-input {
+      width: 100%; min-height: 48px; border: 0; border-bottom: 1px solid var(--ink);
+      background: transparent; outline: 0; padding: 7px 0; font-size: 17px;
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif;
+    }
+    .paper-input:focus { border-bottom-color: var(--accent); }
+    textarea.paper-input { resize: none; line-height: 1.6; min-height: 74px; }
+    .choice-row { display: flex; gap: 13px; padding-top: 5px; }
+    .color-choice {
+      width: 48px; height: 48px; border-radius: 50%; cursor: pointer; border: 7px solid var(--paper);
+      outline: 1px solid transparent; transition: outline .18s ease;
+    }
+    .color-choice.selected { outline-color: var(--ink); }
+    .preview-strip {
+      margin-top: 5px; padding: 17px 0; border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+    }
+    .preview-strip span { font-size: 11px; color: var(--muted); letter-spacing: .08em; }
+    .preview-strip p { margin-top: 8px; font-family: "Noto Serif SC", Georgia, serif; font-size: 18px; }
+    .form-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
+    .empty-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 680px; }
+    .empty-mark {
+      width: 82px; height: 100px; border: 1px solid var(--hairline); position: relative;
+      margin-bottom: 29px;
+    }
+    .empty-mark:before, .empty-mark:after {
+      content:""; position: absolute; left: 19px; right: 19px; height: 1px; background: var(--hairline);
+    }
+    .empty-mark:before { top: 30px; }
+    .empty-mark:after { top: 50px; }
+    .empty-mark b {
+      position: absolute; right: -8px; bottom: -12px; font-family: Georgia, serif;
+      font-size: 44px; color: var(--accent); font-weight: 400;
+    }
+    .empty-screen h2 {
+      font-family: "Noto Serif SC", "Songti SC", Georgia, serif; font-size: 28px; line-height: 1.35;
+      margin-bottom: 11px;
+    }
+    .empty-screen p { color: var(--muted); font-size: 13px; line-height: 1.8; max-width: 270px; margin-bottom: 24px; }
+    .desktop-preview {
+      min-height: 744px; padding: 22px; position: relative;
+      background:
+        linear-gradient(rgba(41,38,33,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(41,38,33,.045) 1px, transparent 1px),
+        #ddcfb9;
+      background-size: 38px 38px;
+    }
+    .desktop-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 34px; }
+    .desktop-meta strong { font-family: Georgia, serif; font-size: 32px; font-weight: 400; }
+    .desktop-meta span { font-size: 11px; letter-spacing: .1em; color: var(--muted); }
+    .desktop-widget {
+      background: var(--paper); border: 1px solid rgba(41,38,33,.26);
+      box-shadow: 0 14px 28px rgba(65,46,25,.16); padding: 19px;
+      min-height: 132px; cursor: pointer; transition: transform .2s ease;
+    }
+    .desktop-widget.large { min-height: 238px; }
+    .desktop-widget:hover { transform: translateY(-2px); }
+    .widget-top { display: flex; justify-content: space-between; align-items: center; }
+    .widget-top span { color: var(--accent); font-size: 10px; letter-spacing: .14em; font-weight: 700; }
+    .widget-top small { color: var(--muted); font-size: 10px; }
+    .widget-body { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 15px; }
+    .widget-body strong { font-family: Georgia, serif; font-size: 68px; line-height: .8; font-weight: 400; letter-spacing: -.06em; }
+    .widget-body div { text-align: right; }
+    .widget-body h3 { font-family: "Noto Serif SC", Georgia, serif; font-size: 20px; margin-bottom: 5px; }
+    .widget-body p { font-size: 10px; color: var(--muted); }
+    .widget-extra { margin-top: 25px; border-top: 1px solid var(--hairline); padding-top: 15px; font-size: 13px; line-height: 1.7; }
+    .widget-controls { display: flex; gap: 8px; margin-top: 25px; }
+    .widget-controls button {
+      min-height: 44px; padding: 0 14px; background: rgba(244,235,221,.84);
+      border: 1px solid var(--hairline); cursor: pointer;
+    }
+    .widget-controls button.selected { background: var(--ink); color: var(--paper); }
+    .hint-copy { margin-top: 33px; color: #625749; font-size: 12px; line-height: 1.75; max-width: 275px; }
+    .toast {
+      position: absolute; left: 50%; bottom: 27px; transform: translateX(-50%);
+      background: var(--ink); color: var(--paper); font-size: 12px; padding: 10px 15px;
+      white-space: nowrap; z-index: 50;
+    }
+    .screen[data-screen="editor"] { padding-top: 17px; padding-bottom: 20px; }
+    .screen[data-screen="editor"] .form-heading { margin: 9px 0 17px; }
+    .screen[data-screen="editor"] .form-field { margin-bottom: 13px; }
+    .screen[data-screen="editor"] .form-actions { margin-top: 17px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    const paperFrameStyles = {
+      wrapper: {
+        display: 'inline-block', padding: 10, background: '#1a1a1a', borderRadius: 44,
+        boxShadow: '0 0 0 2px #2a2a2a, 0 22px 46px rgba(71,52,30,.24)',
+        position: 'relative',
+      },
+      screen: { position: 'relative', borderRadius: 36, overflow: 'hidden', background: '#f4ebdd' },
+      statusBar: {
+        position: 'absolute', top: 0, left: 0, right: 0, height: 32, display: 'flex',
+        alignItems: 'center', justifyContent: 'space-between', padding: '0 24px',
+        fontSize: 12, fontWeight: 600, fontFamily: 'sans-serif', zIndex: 20, pointerEvents: 'none',
+        color: '#1a1a1a',
+      },
+      punchHole: {
+        position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+        width: 14, height: 14, background: '#000', borderRadius: '50%', zIndex: 30,
+      },
+      content: {
+        position: 'absolute', top: 32, left: 0, right: 0, bottom: 24,
+        overflow: 'auto', background: '#f4ebdd',
+      },
+      navBar: {
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 24,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10,
+      },
+    };
+
+    function AndroidFrame({ children, width = 390, height = 800, time = '9:41', battery = 86 }) {
+      return (
+        <div style={paperFrameStyles.wrapper} data-testid="android-frame">
+          <div style={{ ...paperFrameStyles.screen, width, height }}>
+            <div style={paperFrameStyles.statusBar}>
+              <span>{time}</span>
+              <div className="status-icons">
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor" aria-hidden="true">
+                  <rect x="0" y="6" width="2" height="4" rx=".5" />
+                  <rect x="4" y="4" width="2" height="6" rx=".5" />
+                  <rect x="8" y="2" width="2" height="8" rx=".5" />
+                  <rect x="12" y="0" width="2" height="10" rx=".5" />
+                </svg>
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true">
+                  <path d="M7 9a1 1 0 100-2 1 1 0 000 2z" fill="currentColor" />
+                  <path d="M3 6a5 5 0 018 0" stroke="currentColor" strokeWidth="1.2" />
+                  <path d="M.5 3.5a11 11 0 0113 0" stroke="currentColor" strokeWidth="1.2" opacity=".6" />
+                </svg>
+                <div className="battery"><div style={{ width: `${battery}%` }} /></div>
+              </div>
+            </div>
+            <div style={paperFrameStyles.punchHole} />
+            <div style={paperFrameStyles.content}>{children}</div>
+            <div style={paperFrameStyles.navBar}><span /></div>
+          </div>
+        </div>
+      );
+    }
+
+    const paperEvents = [
+      { id: 1, title: '旅行', date: '2026.12.12', kind: '还有', days: 40, dir: 'north', note: '去看海。把工作留在离海很远的地方。' },
+      { id: 2, title: '和阿岚见面', date: '2026.11.08', kind: '还有', days: 6, dir: 'north', note: '老地方，下午三点。' },
+      { id: 3, title: '搬进新家', date: '2025.09.20', kind: '已经', days: 408, dir: 'south', note: '第一晚只煮了一碗面，但灯终于属于自己。' },
+    ];
+
+    function PlusIcon() {
+      return <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 2v14M2 9h14" stroke="currentColor" strokeWidth="1.5" /></svg>;
+    }
+    function ArrowLeft() {
+      return <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true"><path d="M10.5 3.5L5 8.5l5.5 5" stroke="currentColor" strokeWidth="1.5" /></svg>;
+    }
+    function PinIcon() {
+      return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="1" stroke="currentColor" /><path d="M8 5v6M5 8h6" stroke="currentColor" /></svg>;
+    }
+
+    function PaperHome({ events, onOpen, onCreate }) {
+      return (
+        <div className="screen" data-screen="home">
+          <div className="screen-top">
+            <div>
+              <div className="brandline">DAYTAG · 日子簿</div>
+              <div className="subline">2026 年 11 月 2 日，星期一</div>
+            </div>
+            <button className="round-button" aria-label="新建日子" data-testid="home-create" onClick={onCreate}><PlusIcon /></button>
+          </div>
+          <h1 className="paper-title">把日子<br /><em>留在纸上</em></h1>
+          <div className="rule" />
+          <div className="event-list">
+            {events.map(event => (
+              <button className={`event-row ${event.dir}`} key={event.id} data-testid={`event-${event.id}`} onClick={() => onOpen(event)}>
+                <span className="event-kind">{event.kind === '还有' ? '倒计时' : '已开始'}</span>
+                <span>
+                  <span className="event-name">{event.title}</span>
+                  <span className="event-date" style={{ display: 'block' }}>{event.date}</span>
+                </span>
+                <span className="event-days"><strong>{event.days}</strong><small>天</small></span>
+              </button>
+            ))}
+          </div>
+          <div className="footer-note"><span>重要的事，不必喧哗</span><b>03 个日子</b></div>
+        </div>
+      );
+    }
+
+    function PaperDetail({ event, onBack, onEdit }) {
+      const [pinned, setPinned] = useState(false);
+      return (
+        <div className="screen detail-wrap" data-screen="detail">
+          <button className="backline" onClick={onBack}><ArrowLeft /> 所有日子</button>
+          <div style={{ marginTop: 14 }}>
+            <div className="detail-kicker">{event.kind === '还有' ? '距离这一天' : '从这一天起'}</div>
+            <div className="detail-number"><span>{event.days}</span><small>天</small></div>
+            <h2 className="detail-title">{event.title}</h2>
+            <div className="stamp">{event.date}</div>
+            <p className="detail-note">{event.note}</p>
+            <div className="detail-actions">
+              <button className="button-primary" onClick={() => setPinned(true)}><PinIcon /> 添加到桌面</button>
+              <button className="button-quiet" onClick={onEdit}>编辑</button>
+            </div>
+          </div>
+          {pinned && <div className="toast">已准备桌面小部件</div>}
+        </div>
+      );
+    }
+
+    function PaperEditor({ onCancel, onSave }) {
+      const [title, setTitle] = useState('新的日子');
+      const [date, setDate] = useState('2027-01-01');
+      const [note, setNote] = useState('');
+      const [color, setColor] = useState('#b64f2e');
+      const colors = ['#b64f2e', '#6f7b55', '#9a6947', '#394d60'];
+      return (
+        <div className="screen" data-screen="editor">
+          <div className="screen-top">
+            <button className="backline" onClick={onCancel}><ArrowLeft /> 返回</button>
+            <span className="brandline">NEW ENTRY</span>
+          </div>
+          <h2 className="form-heading">写下一个<br />值得记住的日子</h2>
+          <div className="form-field">
+            <label className="form-label" htmlFor="paper-title">这是什么日子？</label>
+            <input id="paper-title" className="paper-input" value={title} maxLength={40} onChange={e => setTitle(e.target.value)} data-testid="editor-title" />
+          </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="paper-date">目标日期</label>
+            <input id="paper-date" className="paper-input" type="date" value={date} onChange={e => setDate(e.target.value)} />
+          </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="paper-note">想说点什么（可选）</label>
+            <textarea id="paper-note" className="paper-input" value={note} maxLength={120} onChange={e => setNote(e.target.value)} placeholder="留给这一天的注脚" />
+          </div>
+          <div className="form-field">
+            <span className="form-label">记忆的颜色</span>
+            <div className="choice-row">
+              {colors.map(c => <button key={c} className={`color-choice ${color === c ? 'selected' : ''}`} style={{ background: c }} onClick={() => setColor(c)} aria-label={`选择颜色 ${c}`} />)}
+            </div>
+          </div>
+          <div className="preview-strip">
+            <span>页面上的样子</span>
+            <p>距离「{title || '未命名'}」还有 <span style={{ color }}>24</span> 天</p>
+          </div>
+          <div className="form-actions">
+            <button className="button-quiet" onClick={onCancel}>取消</button>
+            <button className="button-primary" data-testid="editor-save" onClick={() => onSave({ title: title || '未命名', date: date.replaceAll('-', '.'), note: note || '留给这一天的注脚。', kind: '还有', days: 24, dir: 'north' })}>保存这个日子</button>
+          </div>
+        </div>
+      );
+    }
+
+    function PaperEmpty({ onCreate }) {
+      return (
+        <div className="screen empty-screen" data-screen="empty">
+          <div className="empty-mark" aria-hidden="true"><b>01</b></div>
+          <h2>纸还是空的<br />刚好写第一页</h2>
+          <p>记下一个期待的日期，<br />或一段已经开始的生活。</p>
+          <button className="button-primary" data-testid="empty-create" onClick={onCreate}>写下第一个日子</button>
+        </div>
+      );
+    }
+
+    function PaperWidget() {
+      const [large, setLarge] = useState(false);
+      return (
+        <div className="desktop-preview" data-screen="widget">
+          <div className="desktop-meta"><strong>11:02</strong><span>桌面预览</span></div>
+          <div className={`desktop-widget ${large ? 'large' : ''}`} data-testid="widget-card">
+            <div className="widget-top"><span>DAYTAG</span><small>12 月 12 日</small></div>
+            <div className="widget-body">
+              <strong>40</strong>
+              <div><h3>旅行</h3><p>还有 · 天</p></div>
+            </div>
+            {large && <div className="widget-extra">去看海。把工作留在离海很远的地方。</div>}
+          </div>
+          <div className="widget-controls">
+            <button className={!large ? 'selected' : ''} onClick={() => setLarge(false)}>2 × 1</button>
+            <button className={large ? 'selected' : ''} onClick={() => setLarge(true)}>4 × 2</button>
+          </div>
+          <p className="hint-copy">长按桌面空白处，选择「小部件」，把 DayTag 放在每天都会看见的位置。</p>
+        </div>
+      );
+    }
+
+    function PaperPhone({ initial = 'home', label }) {
+      const [screen, setScreen] = useState(initial);
+      const [events, setEvents] = useState(paperEvents);
+      const [activeEvent, setActiveEvent] = useState(paperEvents[0]);
+
+      const openEvent = event => { setActiveEvent(event); setScreen('detail'); };
+      const saveEvent = event => { setEvents(prev => [event, ...prev]); setScreen('home'); };
+
+      let content;
+      if (screen === 'detail') content = <PaperDetail event={activeEvent} onBack={() => setScreen('home')} onEdit={() => setScreen('editor')} />;
+      else if (screen === 'editor') content = <PaperEditor onCancel={() => setScreen('home')} onSave={saveEvent} />;
+      else if (screen === 'empty') content = <PaperEmpty onCreate={() => setScreen('editor')} />;
+      else if (screen === 'widget') content = <PaperWidget />;
+      else content = <PaperHome events={events} onOpen={openEvent} onCreate={() => setScreen('editor')} />;
+
+      return (
+        <div className="phone-card">
+          <div className="phone-label"><b>{label}</b><span>纸上日历 · 可点击</span></div>
+          <AndroidFrame>{content}</AndroidFrame>
+        </div>
+      );
+    }
+
+    function App() {
+      return (
+        <main className="showcase">
+          <header className="showcase-head">
+            <div>
+              <div className="eyebrow">Direction 01 · Paper Calendar</div>
+              <h1>纸上日历 <i>/</i> 日子有触感</h1>
+            </div>
+            <p className="showcase-copy">
+              把「记住一天」变成在纸页上落下一笔。<strong>编辑式衬线数字</strong>、横向刻度和日期印章共同建立温度；
+              事件通过线与留白区隔，而不是一排可互换的卡片。适合喜欢安静、手帐感与纸质秩序的人。
+            </p>
+          </header>
+          <section className="gallery" aria-label="纸上日历五个界面">
+            <PaperPhone initial="home" label="01 / 首页" />
+            <PaperPhone initial="detail" label="02 / 事件详情" />
+            <PaperPhone initial="editor" label="03 / 写下一个日子" />
+            <PaperPhone initial="empty" label="04 / 空状态" />
+            <PaperPhone initial="widget" label="05 / 桌面小部件" />
+          </section>
+        </main>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
