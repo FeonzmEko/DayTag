@@ -45,13 +45,20 @@ fun TagEventCard(
     val state = DayTagDateCalculator.calculate(event, today)
     val accent = accentColor(event.accentKey)
     val shape = CutCornerShape(topEnd = 12.dp, bottomEnd = 12.dp)
+    val hasNote = !event.note.isNullOrBlank()
 
     Box(modifier = modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
                 .padding(start = 11.dp, top = 12.dp, bottom = 12.dp)
                 .width(1.dp)
-                .height(if (compact) 72.dp else 104.dp)
+                .height(
+                    when {
+                        compact -> 68.dp
+                        hasNote -> 104.dp
+                        else -> 88.dp
+                    },
+                )
                 .background(DayTagPalette.Hairline),
         )
         Row(
@@ -94,19 +101,15 @@ fun TagEventCard(
                     color = DayTagPalette.Muted,
                     style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
                 )
-                if (!compact) {
+                if (!compact && hasNote) {
                     Spacer(Modifier.height(7.dp))
                     Text(
-                        text = when (state) {
-                            is EventDateState.Upcoming -> "这一页，正在慢慢靠近"
-                            EventDateState.Today -> "就是今天，好好看见它"
-                            is EventDateState.Past -> "从这一天开始，生活有了新的地址"
-                        },
+                        text = event.note,
                         color = DayTagPalette.Muted,
                         style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
                             fontSize = 11.sp,
                         ),
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }

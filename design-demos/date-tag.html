@@ -258,7 +258,7 @@
                   <div><h3>{event.title}</h3><p>{event.date}</p></div>
                   <div className="tag-count"><strong>{event.days}</strong><small>天</small></div>
                 </div>
-                <div className="tag-foot">{event.dir === 'south' ? '从这一天开始，生活有了新的地址' : '这一页，正在慢慢靠近'}</div>
+                {event.note && <div className="tag-foot">{event.note}</div>}
               </button>
             ))}
           </div>
